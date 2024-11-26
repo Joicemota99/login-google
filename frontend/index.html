@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Login</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #f4f4f4;
+    }
+    #buttonDiv {
+      margin-top: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Login com Google</h1>
+  <div id="buttonDiv"></div>
+  <script>
+    function handleCredentialResponse(response) {
+      console.log("Google Token: ", response.credential);
+
+      // Enviar o token para o backend
+      fetch("http://localhost:3000/auth/google/callback", {  // Alterar para a rota correta
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token: response.credential }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Resposta do servidor:", data);
+          if (data.user) {
+            alert(`Bem-vindo, ${data.user.name}!`);
+          }
+        })
+        .catch((err) => console.error("Erro no login:", err));
+    }
+
+    window.onload = function () {
+      google.accounts.id.initialize({
+        client_id: "993624212327-kb49tk5hjo8s6ojhegarfb7vhpoee9ug.apps.googleusercontent.com", // Substitua pelo seu Client ID
+        callback: handleCredentialResponse,
+      });
+      google.accounts.id.renderButton(
+        document.getElementById("buttonDiv"),
+        { theme: "outline", size: "large" }
+      );
+    };
+  </script>
+</body>
+</html>
